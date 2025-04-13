@@ -1,0 +1,34 @@
+name: Build VKSaver UWP
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Restore NuGet packages
+        run: nuget restore "VKSaver2/VKSaver UWP.sln"
+
+      - name: Build project
+        run: msbuild "VKSaver2/VKSaver UWP.sln" /p:Configuration=Release /p:Platform=ARM
+
+      - name: Find generated APPX
+        run: |
+          Get-ChildItem -Recurse -Filter *.appx
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VKSaver-Appx
+          path: '**/*.appx'
